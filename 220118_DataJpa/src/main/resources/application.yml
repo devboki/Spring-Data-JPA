@@ -1,0 +1,24 @@
+server:
+  port: 8099
+
+spring:
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/jpashop;
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+    
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        '[format_sql]': true
+#       sql 예쁘게 보이도록 
+
+logging:
+  level:
+    '[org.hibernate.sql]': debug
+#    show_sql은 sysout으로 출력됨. log는 logger를 통해서 찍기
+    '[org.hibernate.type.descriptor.sql]': trace
+#    파라미터 출력을 위한 외부 라이브러리 P6Spy. 운영에서 사용하려면 성능테스트 필요    
