@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 
 import org.hibernate.annotations.ManyToAny;
 
@@ -57,5 +58,10 @@ public class Member {
 		if (team != null) { //team이 null이어도 무시
 			changeTeam(team);
 		}
+	}
+
+	public Member(String username, int age) {
+		this.username = username;
+		this.age = age;
 	}
 }
