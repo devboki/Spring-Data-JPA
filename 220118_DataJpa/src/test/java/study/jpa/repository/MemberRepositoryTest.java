@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Optional;
 
+import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -147,4 +148,30 @@ class MemberRepositoryTest {
 			System.out.println("dto = " + dto);
 		} //dto = MemberDto(id=2, username=AAA, teamName=teamA)
 	}
-}
+	
+	@Test
+	public void returnType() { 
+		Member m1 = new Member("AAA", 10);
+		Member m2 = new Member("BBB", 20);
+		
+		memberRepository.save(m1);
+		memberRepository.save(m2);
+	 
+		List<Member> findCollection = memberRepository.findListByUsername("AAA");
+		System.out.println("findCollection = " + findCollection.size());
+		//select member0_.member_id as member_i1_0_, member0_.age as age2_0_, member0_.team_id as team_id4_0_, member0_.username as username3_0_ from member member0_ where member0_.username='AAA';
+		//findCollection = 1
+		//없는 이름 조회했을 때 null이 아닌 empty collection 반환됨. size() 출력시 findCollection = 0
+		
+		Member findOneMember = memberRepository.findMemberByUsername("AAA");
+		System.out.println("findOneMember = " + findOneMember);
+		//select member0_.member_id as member_i1_0_, member0_.age as age2_0_, member0_.team_id as team_id4_0_, member0_.username as username3_0_ from member member0_ where member0_.username='AAA';
+		//findOneMember = Member(id=1, username=AAA, age=10)
+		//없는 이름 조회했을 때 findOneMember = null 반환
+		
+		Optional<Member> findOptional = memberRepository.findOptionalByUsername("123");
+		System.out.println("findOptional = " + findOptional);
+		//findOptional.get() 출력시 findOptional = Member(id=1, username=AAA, age=10)
+		//.get() 없이 없는 이름 조회했을 때 findOptional = Optional.empty 반환
+		}
+	}

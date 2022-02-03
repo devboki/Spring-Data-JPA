@@ -1,6 +1,8 @@
 package study.jpa.repository;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -30,5 +32,10 @@ public interface MemberRepository extends JpaRepository<Member, Long>{
 	
 	//컬렉션 조회. in :names
 	@Query("select m from Member m where m.username in :names")
-	List<Member> findByNames(@Param("names") List<String> names);
+	List<Member> findByNames(@Param("names") Collection<String> names);
+	
+	//반환 타입 별 
+	List<Member> findListByUsername(String username); //컬렉션
+	Member findMemberByUsername(String username); //단건
+	Optional<Member> findOptionalByUsername(String username); //단건 Optional
 }
