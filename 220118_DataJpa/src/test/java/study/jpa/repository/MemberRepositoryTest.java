@@ -9,6 +9,9 @@ import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -174,4 +177,30 @@ class MemberRepositoryTest {
 		//findOptional.get() 출력시 findOptional = Member(id=1, username=AAA, age=10)
 		//.get() 없이 없는 이름 조회했을 때 findOptional = Optional.empty 반환
 		}
+	
+	@Test
+	public void paging() {
+		memberRepository.save(new Member("member1", 10));
+		memberRepository.save(new Member("member2", 10));
+		memberRepository.save(new Member("member3", 10));
+		memberRepository.save(new Member("member4", 10));
+		memberRepository.save(new Member("member5", 10));
+		
+		int age = 10;
+		PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
+		//JPA는 page 0부터. query log에 offset X. 0으로 지정했기 때문에 필요 없음
+		
+		Page<Member> page = memberRepository.findByAge(age, pageRequest);
+		//반환 타입 Page 때문에 count query실행
+		
+		List<Member> content = page.getContent();
+		long totalElements = page.getTotalElements();
+		
+		for (Member member : content) {
+			System.out.println("member = " + member);
+		}
+		System.out.println("totalEliments = " + totalElements);
 	}
+
+
+}
