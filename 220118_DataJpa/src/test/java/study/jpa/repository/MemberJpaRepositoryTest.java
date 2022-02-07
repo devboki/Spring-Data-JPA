@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +21,7 @@ import study.jpa.entity.Member;
 public class MemberJpaRepositoryTest {
 
 	@Autowired MemberJpaRepository memberJpaRepository;
+	@PersistenceContext EntityManager em;
 	
 	@Test //import 주의. JUnit5 : org.junit.jupiter.api.Test;
 	public void testMember() {
@@ -98,4 +102,20 @@ public class MemberJpaRepositoryTest {
 		assertThat(members.size()).isEqualTo(3);
 		assertThat(totalCount).isEqualTo(5);
 	}
+	
+	@Test
+	public void bulkUpdate() {
+		memberJpaRepository.save(new Member("member1", 10));
+		memberJpaRepository.save(new Member("member2", 19));
+		memberJpaRepository.save(new Member("member3", 20));
+		memberJpaRepository.save(new Member("member4", 21));
+		memberJpaRepository.save(new Member("member5", 40));
+		
+		int resultCount = memberJpaRepository.bulkAgePlus(20); //20보다 크거나 같으면 +1
+		em.flush();
+		em.clear();
+		
+		assertThat(resultCount).isEqualTo(3);
+		//update member set age=age+1 where age>=20;
+		}
 }

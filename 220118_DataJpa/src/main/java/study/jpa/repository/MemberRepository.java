@@ -6,7 +6,9 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -42,5 +44,16 @@ public interface MemberRepository extends JpaRepository<Member, Long>{
 	Optional<Member> findOptionalByUsername(String username); //단건 Optional
 	
 	/* 페이징 */
+	//count query 분리
+	@Query(value = "select m from Member m left join m.team t", 
+			countQuery = "select count(m.username) from Member m") //value까지 작성하면 count query까지 join하므로 성능 X
 	Page<Member> findByAge(int age, Pageable pageable);
+	//Page 인터페이스의 totalElements() 필요 없다면
+	//Slice<Member> findByAge(int age, Pageable pageable); 
+	
+	/* bulkUpdate */
+	@Modifying(clearAutomatically = true) //.executeUpdate() 실행
+	@Query("update Member m set m.age = m.age + 1 where m.age >= :age")
+	int bulkAgePlus(@Param("age") int age);
+	
 }

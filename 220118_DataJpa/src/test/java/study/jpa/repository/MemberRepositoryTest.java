@@ -5,12 +5,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
@@ -192,15 +196,43 @@ class MemberRepositoryTest {
 		
 		Page<Member> page = memberRepository.findByAge(age, pageRequest);
 		//반환 타입 Page 때문에 count query실행
+		//Slice<Member> page = memberRepository.findByAge(age, pageRequest);
+		
+		Page<MemberDto>toMap = page.map(member -> new MemberDto(member.getId(), member.getUsername(), null));
+		//Dto로 바꿀 수 있기 때문에 API로 보낼 수 있음
 		
 		List<Member> content = page.getContent();
 		long totalElements = page.getTotalElements();
+		//반환 타입 Page에만 있음 
 		
+		/*
 		for (Member member : content) {
 			System.out.println("member = " + member);
 		}
 		System.out.println("totalEliments = " + totalElements);
+		*/
+		
+		assertThat(content.size()).isEqualTo(3);
+		assertThat(page.getTotalElements()).isEqualTo(5);
+		assertThat(page.getNumber()).isEqualTo(0); //페이지 번호
+		assertThat(page.getTotalPages()).isEqualTo(2); //전체 페이지 개수
+		assertThat(page.isFirst()).isTrue(); //첫 페이지가 있는지
+		assertThat(page.hasNext()).isTrue(); //다음 페이지가 있는지
 	}
+	
+	@Test
+	public void bulkUpdate() {
+		memberRepository.save(new Member("member1", 10));
+		memberRepository.save(new Member("member2", 19));
+		memberRepository.save(new Member("member3", 20));
+		memberRepository.save(new Member("member4", 21));
+		memberRepository.save(new Member("member5", 40));
+		
+		int resultCount = memberRepository.bulkAgePlus(20); //20보다 크거나 같으면 +1
+		
+		assertThat(resultCount).isEqualTo(3);
+		//update member set age=age+1 where age>=20;
+		}
 
 
 }
