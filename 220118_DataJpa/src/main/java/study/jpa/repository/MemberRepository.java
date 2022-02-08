@@ -4,12 +4,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.LockModeType;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.QueryHint;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 
 import study.jpa.dto.MemberDto;
@@ -56,4 +64,30 @@ public interface MemberRepository extends JpaRepository<Member, Long>{
 	@Query("update Member m set m.age = m.age + 1 where m.age >= :age")
 	int bulkAgePlus(@Param("age") int age);
 	
+	/* fetchJoin 1)jpql */
+	@Query("select m from Member m left join fetch m.team") //한방쿼리로 조회
+	List<Member> findMemberFetchJoin();
+	
+	/* fetchJoin 2)entityGraph */
+	@Override
+	@EntityGraph(attributePaths = {"team"})
+	List<Member> findAll();
+	
+	/* fetchJoin 3)jpql + entityGraph */
+	@EntityGraph(attributePaths = {"team"})
+	@Query("select m from Member m")
+	List<Member> findMemberEntityGraph();
+	
+	/* fetchJoin 4) find_By_() + namedEntityGraph */
+	//Member class : @NamedEntityGraph(name = "Member.all", attributeNodes = @NamedAttributeNode("team"))
+	@EntityGraph("Member.all")
+	List<Member> findEntityGraphByUsername(@Param("username") String username);
+	
+	//더티체킹 X
+	@QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
+	Member findReadOnlyByUsername(String username);
+	
+	//select ~ for update : 동시성 제어를 위한 select 잠금. 해당 데이터 수정할 때까지 다른 세선에서 읽기쓰기 금지(=lock)
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	List<Member> findLockByUsername(String username);
 }

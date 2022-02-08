@@ -30,6 +30,7 @@ class MemberRepositoryTest {
 	
 	@Autowired MemberRepository memberRepository;
 	@Autowired TeamRepository teamRepository;
+	@PersistenceContext EntityManager em;
 	
 	@Test
 	public void testMember() {
@@ -234,5 +235,62 @@ class MemberRepositoryTest {
 		//update member set age=age+1 where age>=20;
 		}
 
+	@Test
+	public void findMemberLazy() {
+		Team teamA = new Team("teamA");
+		Team teamB = new Team("teamB");
+		teamRepository.save(teamA);
+		teamRepository.save(teamB);
+		Member member1 = new Member("member1", 10, teamA);
+		Member member2 = new Member("member2", 10, teamB);
+		memberRepository.save(member1);
+		memberRepository.save(member2);
+		
+		em.flush();
+		em.clear();
+		
+		//List<Member> members = memberRepository.findMemberFetchJoin();
+		//List<Member> members = memberRepository.findAll();
+		List<Member> members = memberRepository.findEntityGraphByUsername("member1");
+		//select Member 1
+		//N + 1
+		
+		for (Member member : members) {
+			System.out.println("member = " + member.getUsername());
+			System.out.println("member.teamClass = " + member.getTeam().getClass());
+			//member.teamClass = class study.jpa.entity.Team$HibernateProxy$RW2VfVmU
+			System.out.println("member.team = " + member.getTeam().getName());
+			//1차캐시에 없는 team name을 가져오려고 query가 또 나감
+		}
+	}
+	
+	@Test
+	public void queryHint() {
+		Member member1 = new Member("member1", 10);
+		memberRepository.save(member1);
+		em.flush(); //db에 날려주고 1차 캐시에 남아있음
+		em.clear(); //1차 캐시 지우기
+		
+		//Member findMember = memberRepository.findById(member1.getId()).get(); //실무에서 .get() X
+		Member findMember = memberRepository.findReadOnlyByUsername("member1");
 
+		findMember.setUsername("member2"); 
+		
+		em.flush(); 
+		//.findById() => update member set age=10, team_id=NULL, username='member2' where member_id=1;
+		//.findReadOnlyByUsername() => update X
+	}
+
+	@Test
+	public void lock() {
+		Member member1 = new Member("member1", 10);
+		memberRepository.save(member1);
+		em.flush();
+		em.clear();
+		
+		List<Member> result = memberRepository.findLockByUsername("member1");
+		//where member0_.username=? for update
+	}
+	
+	
 }

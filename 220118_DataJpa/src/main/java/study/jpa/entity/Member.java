@@ -7,9 +7,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.NamedQuery;
 
 import org.hibernate.annotations.ManyToAny;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -21,6 +24,7 @@ import lombok.ToString;
 @Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(of = {"id", "username", "age"}) //연관관계 필드는 toString X
+@NamedEntityGraph(name = "Member.all", attributeNodes = @NamedAttributeNode("team")) //@EntityGraph("Member.all")
 public class Member {
 	
 	@Id @GeneratedValue
