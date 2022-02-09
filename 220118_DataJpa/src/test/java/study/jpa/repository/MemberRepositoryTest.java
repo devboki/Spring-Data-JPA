@@ -32,6 +32,9 @@ class MemberRepositoryTest {
 	@Autowired TeamRepository teamRepository;
 	@PersistenceContext EntityManager em;
 	
+	@Autowired MemberQueryRepository memberQueryRepository;
+	//repository class를 spring bean으로 등록해서 직접 사용하는 방법. (spring data JPA와는 아무런 관계 X 별도로 동작)
+	
 	@Test
 	public void testMember() {
 		System.out.println("memberRepository = " + memberRepository.getClass()); 
@@ -281,6 +284,7 @@ class MemberRepositoryTest {
 		//.findReadOnlyByUsername() => update X
 	}
 
+	
 	@Test
 	public void lock() {
 		Member member1 = new Member("member1", 10);
@@ -290,6 +294,11 @@ class MemberRepositoryTest {
 		
 		List<Member> result = memberRepository.findLockByUsername("member1");
 		//where member0_.username=? for update
+	}
+	
+	@Test
+	public void callCustom() {
+		List<Member> result = memberRepository.findMemberCustom();
 	}
 	
 	

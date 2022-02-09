@@ -25,7 +25,7 @@ import lombok.ToString;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(of = {"id", "username", "age"}) //연관관계 필드는 toString X
 @NamedEntityGraph(name = "Member.all", attributeNodes = @NamedAttributeNode("team")) //@EntityGraph("Member.all")
-public class Member {
+public class Member extends BaseEntity {
 	
 	@Id @GeneratedValue
 	@Column(name = "member_id") //table명은 관례상 name 매핑

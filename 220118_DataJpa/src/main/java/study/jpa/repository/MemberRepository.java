@@ -23,7 +23,7 @@ import org.springframework.data.repository.query.Param;
 import study.jpa.dto.MemberDto;
 import study.jpa.entity.Member;
 
-public interface MemberRepository extends JpaRepository<Member, Long>{
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
 	List<Member> findByUsernameAndAgeGreaterThan(String username, int age);
 	List<Member> findTop3HelloBy();
 	
